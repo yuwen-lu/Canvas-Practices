@@ -5,7 +5,7 @@ var c = canvas.getContext("2d");
 
 const gravity = 1;
 const loss = 0.99;
-const circleAmount = 20;
+const circleAmount = 200;
 const suspendDistance = 50;
 var colorArray = ["#1445D9", "#325CD9", "#203B8C", "#F29580", "#D91C0B"];
 var circleArray = [];
