@@ -1,104 +1,105 @@
 var canvas = document.querySelector("canvas");
-canvas.height = window.innerHeight;
 canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 var c = canvas.getContext("2d");
 
-var time = 0; // the time that the circle has traveled
-var timeInterval = 0.05; // timeInterval is the defined interval of time for each refresh
-const g = 9.8; // the gravitition constant
-var movingDirection = true; // the moving direction for the ball, downwards as true, upwards as false, default downwards
-// the initial speed for each period
-var vyInitial = 0;
+const gravity = 1;
+const loss = 0.99;
+const circleAmount = 300;
+const suspendDistance = 50;
+var colorArray = ["#1445D9", "#325CD9", "#203B8C", "#F29580", "#D91C0B"];
+var circleArray = [];
+var mouse = {
+  x: undefined,
+  y: undefined
+};
 
-function Circle(x, y, radius, vx, vy) {
+function Circle(x, y, radius, color, dx, dy) {
   this.x = x;
   this.y = y;
   this.radius = radius;
-  this.vx = vx;
-  this.vy = vy;
+  this.color = color;
+  this.dx = dx;
+  this.dy = dy;
 
   this.draw = function() {
     c.beginPath();
     c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+
+    c.fillStyle = this.color;
+
     c.stroke();
     c.fill();
   };
 
   this.move = function() {
-    // 500 is the height of the land
-    // first condition: if it's moving downwards
-    if (movingDirection) {
-      if (this.y + this.radius <= 500) {
-        this.y +=
-          this.vy * timeInterval +
-          g * time * timeInterval +
-          (g * timeInterval * timeInterval) / 2; // some math and physics
-        this.vy = g * time;
-        console.log("1");
-      } else {
-        this.y = 500 - this.radius; // make sure the circle is in place
-        vyInitial = this.vy;
-        time = 0;
-        movingDirection = false;
-        // this.vy = 0.8 * this.vy;
+    if (
+      Math.abs(this.x - mouse.x) <= suspendDistance &&
+      Math.abs(this.y - mouse.y) <= suspendDistance
+    ) {
+      // in the beginning no mouse movement is detected, mouse.x and y are undefined, this will always be false
+      if (this.dy < 0) {
+        this.dy = -this.dy;
       }
     } else {
-      if (this.vy > 0) {
-        // the direction of the speed changed, which makes it a bit tricky
-        this.y -=
-          vyInitial * timeInterval -
-          g * time * timeInterval -
-          (g * timeInterval * timeInterval) / 2;
-        console.log(
-          vyInitial * timeInterval -
-            g * time * timeInterval -
-            (g * timeInterval * timeInterval) / 2
-        );
-        this.vy -= g * time;
-        console.log("3", this.vy);
-      } else {
-        vyInitial = 0;
-        time = 0;
-        movingDirection = true;
+      if (this.x < this.radius || this.x > innerWidth - this.radius) {
+        this.dx = -this.dx;
       }
+      if (this.y + this.dy > innerHeight - this.radius) {
+        this.dy = -this.dy * loss;
+      } else {
+        this.dy += gravity;
+      }
+      this.x += this.dx;
+      this.y += this.dy;
     }
-
     this.draw();
   };
 }
 
-var x = 400;
-var y = 100;
-var radius = 40;
-// initial speed for the ball
-var vx = 0;
-var vy = 0;
-var circle = new Circle(x, y, radius, vx, vy);
-
-function init() {
-  // draw the line to represent ground
-  c.beginPath();
-  c.moveTo(200, 500);
-  c.lineTo(600, 500);
-  c.stroke();
-  circle.draw();
+function randomNumber(min, max) {
+  return Math.floor(Math.random() * (max - min) + min);
 }
 
-init();
+function generateCircles(amount) {
+  for (var i = 0; i < amount; i++) {
+    var radius = randomNumber(5, 50);
 
-window.addEventListener("resize", () => {
-  canvas.height = window.innerHeight;
+    var x = randomNumber(radius, window.innerWidth - radius);
+    var y = randomNumber(radius, window.innerHeight - radius);
+    var color = colorArray[randomNumber(0, colorArray.length)];
+    var dx = randomNumber(-5, 5);
+    var dy = randomNumber(-5, 5);
+
+    circleArray.push(new Circle(x, y, radius, color, dx, dy));
+  }
+}
+
+window.addEventListener("resize", function() {
+  circleArray = [];
   canvas.width = window.innerWidth;
-  init();
+  canvas.height = window.innerHeight;
+  generateCircles(circleAmount);
 });
+
+window.addEventListener("mousemove", event => {
+  mouse.x = event.x;
+  mouse.y = event.y;
+});
+
+window.addEventListener("click", () => {
+  circleArray = [];
+  generateCircles(circleAmount);
+});
+
+generateCircles(circleAmount);
 
 function animate() {
   requestAnimationFrame(animate);
-  c.clearRect(0, 0, 600, 499);
-  c.clearRect(0, 501, 600, 300);
-  circle.move();
-
-  time += timeInterval;
+  c.clearRect(0, 0, innerWidth, innerHeight);
+  circleArray.forEach(current => {
+    current.move();
+  });
 }
 
-// animate();
+animate();
