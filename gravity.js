@@ -21,6 +21,11 @@ function Circle(x, y, radius, color, dx, dy) {
   this.color = color;
   this.dx = dx;
   this.dy = dy;
+  this.disToMouse = {
+    xdis: 100,
+    ydis: 100 // initial distance, some random number greater than suspendDistance
+  };
+  this.hooked = false;
 
   this.draw = function() {
     c.beginPath();
@@ -33,14 +38,23 @@ function Circle(x, y, radius, color, dx, dy) {
   };
 
   this.move = function() {
+    if (!this.hooked) {
+      this.disToMouse.xdis = this.x - mouse.x;
+      this.disToMouse.ydis = this.y - mouse.y;
+    }
     if (
-      Math.abs(this.x - mouse.x) <= suspendDistance &&
-      Math.abs(this.y - mouse.y) <= suspendDistance
+      Math.abs(this.disToMouse.xdis) <= suspendDistance &&
+      Math.abs(this.disToMouse.ydis) <= suspendDistance
     ) {
       // in the beginning no mouse movement is detected, mouse.x and y are undefined, this will always be false
-      if (this.dy < 0) {
-        this.dy = -this.dy;
-      }
+
+      // to let the balls fall down instead of flying up after release
+      // if (this.dy < 0) {
+      //   this.dy = -this.dy;
+      // }
+      this.x = mouse.x + this.disToMouse.xdis;
+      this.y = mouse.y + this.disToMouse.ydis;
+      this.hooked = true;
     } else {
       if (this.x < this.radius || this.x > innerWidth - this.radius) {
         this.dx = -this.dx;
@@ -92,7 +106,7 @@ window.addEventListener("click", () => {
   generateCircles(circleAmount);
 });
 
-generateCircles(circleAmount);
+// generateCircles(circleAmount);
 
 function animate() {
   requestAnimationFrame(animate);
