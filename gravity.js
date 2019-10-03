@@ -5,7 +5,7 @@ var c = canvas.getContext("2d");
 
 const gravity = 1;
 const loss = 0.99;
-const circleAmount = 300;
+const circleAmount = 20;
 const suspendDistance = 50;
 var colorArray = ["#1445D9", "#325CD9", "#203B8C", "#F29580", "#D91C0B"];
 var circleArray = [];
@@ -13,6 +13,7 @@ var mouse = {
   x: undefined,
   y: undefined
 };
+var success = false;
 
 function Circle(x, y, radius, color, dx, dy) {
   this.x = x;
@@ -89,6 +90,18 @@ function generateCircles(amount) {
   }
 }
 
+function checkSuccess() {
+  var numOfHooked = 0;
+  circleArray.forEach(current => {
+    if (current.hooked) {
+      numOfHooked++;
+    }
+  });
+  if (numOfHooked == circleArray.length && numOfHooked != 0) {
+    success = true;
+  }
+}
+
 window.addEventListener("resize", function() {
   circleArray = [];
   canvas.width = window.innerWidth;
@@ -114,6 +127,13 @@ function animate() {
   circleArray.forEach(current => {
     current.move();
   });
+  checkSuccess();
+  if (success) {
+    var successVid = document.querySelector("video");
+    successVid.style.display = "block";
+    successVid.play();
+    canvas.style.display = "none";
+  }
 }
 
 animate();
