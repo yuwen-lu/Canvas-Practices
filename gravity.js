@@ -3,9 +3,11 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 var c = canvas.getContext("2d");
 
+var successVid = document.querySelector("video");
+
 const gravity = 1;
 const loss = 0.99;
-const circleAmount = 200;
+const circleAmount = 10;
 const suspendDistance = 50;
 var colorArray = ["#1445D9", "#325CD9", "#203B8C", "#F29580", "#D91C0B"];
 var circleArray = [];
@@ -115,6 +117,14 @@ window.addEventListener("mousemove", event => {
 });
 
 window.addEventListener("click", () => {
+  if (canvas.style.display == "none") {
+    success = !success;
+    canvas.style.display = "";
+    // load the video again, which will also make it pause
+    successVid.load();
+    successVid.style.display = "none";
+    console.log("hey");
+  }
   circleArray = [];
   generateCircles(circleAmount);
 });
@@ -129,8 +139,8 @@ function animate() {
   });
   checkSuccess();
   if (success) {
-    var successVid = document.querySelector("video");
     successVid.style.display = "block";
+    successVid.volume = 1;
     successVid.play();
     canvas.style.display = "none";
   }
