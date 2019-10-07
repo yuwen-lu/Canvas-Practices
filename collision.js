@@ -41,6 +41,7 @@ function Circle(x, y, radius, dx, dy, color) {
   };
 
   this.Update = function() {
+    // the following code is for moving and gravity
     if (
       this.x + this.dx <= this.radius ||
       this.x + this.dx >= canvas.width - this.radius
@@ -56,27 +57,51 @@ function Circle(x, y, radius, dx, dy, color) {
     this.x += this.dx;
     this.y += this.dy;
     this.dy += gravity;
+
     this.Draw();
   };
 }
+
+function CircleDistance(x1, y1, x2, y2) {
+  let xdis = x1 - x2;
+  let ydis = y1 - y2;
+  return Math.sqrt(xdis * xdis + ydis * ydis);
+}
+console.log(CircleDistance(1, 2, 3, 3));
 
 var circleArray = [];
 
 function initCircles(amount) {
   for (var i = 0; i < amount; i++) {
-    var radius = randomNumber(5, 50);
+    let radius = randomNumber(5, 50);
 
-    var x = randomNumber(radius, window.innerWidth - radius);
-    var y = randomNumber(radius, window.innerHeight - radius);
+    let x = randomNumber(radius, window.innerWidth - radius);
+    let y = randomNumber(radius, window.innerHeight - radius);
     var dx = randomNumber(-3, 3);
     var dy = randomNumber(-3, 3);
     var color = colorArray[randomNumber(0, colorArray.length)];
+
+    // if it's not the first circle, avoid it overlapping with any other circle
+    if (i != 0) {
+      for (let j = 0; j < circleArray.length; j++) {
+        if (
+          CircleDistance(x, y, circleArray[j].x, circleArray[j].y) <=
+          radius + circleArray[j].radius
+        ) {
+          x = randomNumber(radius, window.innerWidth - radius);
+          y = randomNumber(radius, window.innerHeight - radius);
+          j = -1;
+        }
+      }
+    }
+
     circleArray.push(new Circle(x, y, radius, dx, dy, color));
   }
   console.log(circleArray);
 }
 
 function init() {
+  circleArray = [];
   initCircles(circleAmount);
 }
 
@@ -91,4 +116,4 @@ function animate() {
   });
 }
 
-animate();
+// animate();
