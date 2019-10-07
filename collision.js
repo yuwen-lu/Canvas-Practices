@@ -6,6 +6,8 @@ canvas.style.border = "solid 1px black";
 var c = canvas.getContext("2d");
 
 var circleAmount = 20;
+var gravity = 1;
+var fraction = 0.9;
 var colorArray = ["#1445D9", "#325CD9", "#203B8C", "#F29580", "#D91C0B"];
 
 function randomNumber(min, max) {
@@ -14,7 +16,7 @@ function randomNumber(min, max) {
     if (num != 0) {
       return num;
     } else {
-      randomNumber(min, max);
+      return randomNumber(min, max);
     }
   } else {
     console.log("error for function randomNumber: min value not smaller max");
@@ -49,10 +51,11 @@ function Circle(x, y, radius, dx, dy, color) {
       this.y + this.dy <= this.radius ||
       this.y + this.dy >= canvas.height - this.radius
     ) {
-      this.dy = -this.dy;
+      this.dy = -this.dy * fraction;
     }
     this.x += this.dx;
     this.y += this.dy;
+    this.dy += gravity;
     this.Draw();
   };
 }
@@ -70,6 +73,7 @@ function initCircles(amount) {
     var color = colorArray[randomNumber(0, colorArray.length)];
     circleArray.push(new Circle(x, y, radius, dx, dy, color));
   }
+  console.log(circleArray);
 }
 
 function init() {
